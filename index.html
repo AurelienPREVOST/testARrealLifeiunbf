@@ -3,25 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chasse aux œufs en réalité augmentée</title>
-    <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@3f0df33946cf12e3d552b3b4e500dd5b8ff6f692/dist/aframe-master.min.js"></script>
+    <title>Réalité augmentée géolocalisée avec A-Frame et AR.js</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
     <a-scene
-        renderer="logarithmicDepthBuffer: true;"
         embedded
         arjs="sourceType: webcam; debugUIEnabled: false;"
     >
-        <!-- Ajout de cubes autour de la caméra GPS -->
-        <a-entity gps-entity-place="latitude: 46.6406; longitude: 0.2271;">
-            <a-box color="red" position="3 0 0"></a-box>
-            <a-box color="green" position="0 0 -3"></a-box>
-            <a-box color="blue" position="-3 0 0"></a-box>
-            <a-box color="yellow" position="0 0 3"></a-box>
-        </a-entity>
-
-        <!-- Caméra GPS -->
+        <!-- Caméra -->
         <a-camera gps-camera rotation-reader></a-camera>
+
+        <!-- Générer des cubes autour de la position actuelle -->
+        <script>
+            // Coordonnées GPS de ta position actuelle
+            var latitude = 46.6408043;
+            var longitude = 0.2271161;
+
+            // Nombre d'objets à générer
+            var numberOfObjects = 20;
+
+            // Rayon autour de la position actuelle où les objets seront placés (en mètres)
+            var radius = 20;
+
+            // Générer les objets
+            for (var i = 0; i < numberOfObjects; i++) {
+                // Générer une position aléatoire autour de la position actuelle
+                var randomAngle = Math.random() * Math.PI * 2;
+                var randomDistance = Math.random() * radius;
+
+                var objectLatitude = latitude + (randomDistance / 111300) * Math.cos(randomAngle);
+                var objectLongitude = longitude + (randomDistance / (111300 * Math.cos(latitude * Math.PI / 180))) * Math.sin(randomAngle);
+
+                // Créer un élément <a-box> pour chaque objet
+                var box = document.createElement('a-box');
+                box.setAttribute('color', '#' + Math.floor(Math.random()*16777215).toString(16)); // Couleur aléatoire
+                box.setAttribute('position', {
+                    x: (objectLongitude - longitude).toFixed(6), // Convertir la différence de longitude en mètres
+                    y: 0.5,
+                    z: (objectLatitude - latitude).toFixed(6) // Convertir la différence de latitude en mètres
+                });
+                document.querySelector('a-scene').appendChild(box);
+            }
+        </script>
     </a-scene>
 </body>
 </html>
